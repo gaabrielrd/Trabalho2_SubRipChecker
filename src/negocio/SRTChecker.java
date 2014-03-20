@@ -31,7 +31,7 @@ public class SRTChecker {
         readF = new FileReader(path);
     }
 
-    public void check() throws Exception {
+    public void check() throws Exception {        
         BufferedReader reader = new BufferedReader(readF);
         errors.clear();
         String line;
@@ -40,68 +40,63 @@ public class SRTChecker {
         Date start = null, end = null;
         try {
             line = reader.readLine();
-            while (line != null) {
+            while(line != null){
                 line = line.trim();
-                switch (step) {
+                switch (step){
                     case 0: // Procura por um número inteiro (numeração da legenda)
-                        if (line.length() > 0) {
+                        if (line.length() > 0){
                             try {
                                 Integer.parseInt(line);
-
+                                
                                 step++; // Avança para a próxima verificação
                             } catch (Exception e) {
-                                errors.add("Linha " + lineCounter + ": não contém um contador inteiro.");
+                                errors.add("Linha "+lineCounter+": não contém um contador inteiro.");
                             }
+                        } else {
+                            errors.add("Linha "+lineCounter+": linha em branco.");
                         }
                         break;
                     case 1: // Procura pelos tempos da legenda e faz verificações
                         line = line.toLowerCase();
                         try {
-                            int arrowPos = line.indexOf("-->"), x1Pos = line.indexOf("x1");
-
-                            if (arrowPos < 0) {
-                                throw new Exception("'-->' não encontrado.");
-                            }
-
-                            String first = line.substring(0, arrowPos).trim(),
-                                    second;
-                            if (x1Pos < 0) {
-                                second = line.substring(arrowPos + 3).trim();
-                            } else {
-                                second = line.substring(arrowPos + 3, x1Pos).trim();
-                            }
-
+                            int arrowPos = line.indexOf("-->"),
+                                x1Pos = line.indexOf("x1");
+                            
+                            if (arrowPos < 0){ throw new Exception("'-->' não encontrado."); }
+                            
+                            String first = line.substring(0, 12),
+                                   second;
+                            if (x1Pos < 0){
+                                second = line.substring(16);
+                            } else second = line.substring(16, 28);
+                            
                             step++; // Avança pra próxima verificação mesmo que formato da data esteja errado
-
+                            
                             start = sdf.parse(first);
-                            if (end != null) {
-                                if (end.after(start)) {
-                                    throw new Exception("legenda inicia antes do término da anterior.");
-                                }
+                            if (end != null){
+                                if (end.after(start))
+                                { throw new Exception("legenda inicia antes do término da anterior."); }
                             }
                             end = sdf.parse(second);
-                            if (end.before(start)) {
-                                throw new Exception("legenda termina antes de iniciar.");
-                            }
+                            if (end.before(start))
+                            { throw new Exception("legenda termina antes de iniciar."); }
                         } catch (Exception e) {
-                            errors.add("Linha " + lineCounter + ": " + e.getMessage());
+                            errors.add("Linha "+lineCounter+": "+e.getMessage());
                         }
                         break;
                     case 2: // Procura pelo texto da legenda
                         try {
-                            if (line.length() == 0) {
-                                throw new Exception();
-                            }
+                            if (line.length() == 0)
+                            { throw new Exception(); }
                             step++;
                         } catch (Exception e) {
-                            errors.add("Linha " + lineCounter + ": legenda em branco.");
+                            errors.add("Linha "+lineCounter+": legenda em branco.");
                             step = 0;
                         }
                         break;
                     case 3: // Procura por um espaço em branco separando legendas
-                        if (line.length() == 0) {
-                            step = 0;
-                        }
+                        if (line.length() == 0)
+                        { step = 0; }
                         break;
                 }
                 line = reader.readLine();
@@ -110,9 +105,8 @@ public class SRTChecker {
         } finally {
             reader.close();
         }
-        writeErrors();
     }
-
+    
     public void setWriteMethod(int method) throws Exception {
         if (method < 0 || method > 2) {
             throw new Exception("Favor selecionar um método de saída.");
