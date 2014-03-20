@@ -105,6 +105,7 @@ public class SRTChecker {
         } finally {
             reader.close();
         }
+        writeErrors();
     }
     
     public void setWriteMethod(int method) throws Exception {
